@@ -1,4 +1,5 @@
 ﻿#include "preprocess.h"
+#include "config.h"
 
 
 __global__ void letterbox(const uchar* srcData, const int srcH, const int srcW, uchar* tgtData, 
@@ -9,18 +10,18 @@ __global__ void letterbox(const uchar* srcData, const int srcH, const int srcW, 
     int idx = ix + iy * tgtW;
     int idx3 = idx * 3;
 
-    if ( ix > tgtW || iy > tgtH ) return;  // thread out of target range
+    if ( ix >= tgtW || iy >= tgtH ) return;  // thread out of target range
     // gray region on target image
     if ( iy < startY || iy > (startY + rszH - 1) ) {
-        tgtData[idx3] = 128;
-        tgtData[idx3 + 1] = 128;
-        tgtData[idx3 + 2] = 128;
+        tgtData[idx3] = kLetterboxValue;
+        tgtData[idx3 + 1] = kLetterboxValue;
+        tgtData[idx3 + 2] = kLetterboxValue;
         return;
     }
     if ( ix < startX || ix > (startX + rszW - 1) ){
-        tgtData[idx3] = 128;
-        tgtData[idx3 + 1] = 128;
-        tgtData[idx3 + 2] = 128;
+        tgtData[idx3] = kLetterboxValue;
+        tgtData[idx3 + 1] = kLetterboxValue;
+        tgtData[idx3 + 2] = kLetterboxValue;
         return;
     }
 

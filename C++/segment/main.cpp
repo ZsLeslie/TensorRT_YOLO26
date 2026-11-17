@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "infer.h"
+#include <exception>
 
 
 int run(char* imageDir){
@@ -11,7 +12,6 @@ int run(char* imageDir){
     }
 
     // create detector, and load engine plan
-    std::string trtFile = "./yolo11s-seg.plan";
     YoloDetector detector(trtFile);
 
     // inference
@@ -49,5 +49,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    return run(argv[1]);
+    try {
+        return run(argv[1]);
+    } catch (const std::exception& error) {
+        std::cerr << "Inference failed: " << error.what() << std::endl;
+        return 1;
+    }
 }

@@ -63,7 +63,7 @@ __global__ void decode_kernel(float* src, float* dst, int numBboxes, int numClas
 
 
 void decode(float* src, float* dst, int numBboxes, int numClasses, int numMasks, float confThresh, int maxObjects, int numBoxElement, cudaStream_t stream){
-    cudaMemset(dst, 0, sizeof(int));
+    cudaMemsetAsync(dst, 0, sizeof(float), stream);
     int blockSize = 256;
     int gridSize = (numBboxes + blockSize - 1) / blockSize;
     decode_kernel<<<gridSize, blockSize, 0, stream>>>(src, dst, numBboxes, numClasses, numMasks, confThresh, maxObjects, numBoxElement);

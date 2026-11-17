@@ -3,6 +3,7 @@
 #include <iterator>
 #include <opencv2/opencv.hpp>
 #include "calibrator.h"
+#include "config.h"
 #include "utils.h"
 
 using namespace nvinfer1;
@@ -30,7 +31,7 @@ std::vector<float> preprocess(cv::Mat& img, int input_w, int input_h)
     }
     cv::Mat re(h, w, CV_8UC3);
     cv::resize(img, re, re.size(), 0, 0, cv::INTER_LINEAR);
-    cv::Mat out(input_h, input_w, CV_8UC3, cv::Scalar(128, 128, 128));
+    cv::Mat out(input_h, input_w, CV_8UC3, cv::Scalar(kLetterboxValue, kLetterboxValue, kLetterboxValue));
     re.copyTo(out(cv::Rect(x, y, re.cols, re.rows)));
 
     // HWC to CHW , BGR to RGB, Normalize

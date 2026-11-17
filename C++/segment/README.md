@@ -1,54 +1,49 @@
-# YOLO11 实例分割模型转 TensorRT
+# YOLO26 / YOLO11 实例分割模型转 TensorRT
 
 ![_10014](./output/_10014.jpeg)
 
-## 导出ONNX模型
+默认使用 `onnx_model/yolo26m-seg.onnx`，推理接口仍兼容相同输出布局的 YOLO11 分割模型。项目使用 TensorRT 8.x API；当前模型使用 Opset 16，建议使用 TensorRT 8.6。
 
-1. 安装 `YOLO11`
+## 模型要求
 
-```bash
-pip install ultralytics
-```
+当前提供的 YOLO26 ONNX 由 Ultralytics 8.4.211 导出，`end2end=False`、`nms=None`，输入输出均为 FP32：
 
-- 建议同时从 `GitHub` 上 clone 或下载一份 `YOLO11` 源码到本地；
-- 根据 `GitHub` 上 `YOLO11` 的 `README` 中的链接下载关键点检测模型，如：`yolo11s-seg.pt`；
-- 在本地 `YOLO11`一级 `ultralytics` 目录下，新建 `weights` 目录，并且放入下载的`yolo11s-seg.pt`模型
+| 张量 | 形状 | 内容 |
+| --- | --- | --- |
+| `images` | `[1, 3, 640, 640]` | RGB、CHW、归一化到 0–1 |
+| `output0` | `[1, 116, 8400]` | `xywh` + 80 个类别分数 + 32 个掩膜系数 |
+| `output1` | `[1, 32, 160, 160]` | 掩膜原型 |
 
-2. 安装onnx相关库
+程序按张量名称查询 TensorRT 绑定索引，并校验形状和数据类型；后处理保留转置、置信度过滤、NMS 和掩膜重建。Letterbox 填充值为 114。
 
-```bash
-pip install onnx==1.14.0
-pip install onnxslim==0.1.34
-```
-
-3. 导出onnx模型
-
-- 可以在一级 `ultralytics` 目录下，新建 `export_onnx.py` 文件
-- 向文件中写入如下内容：
+不支持 `[1, 300, 38]` 等端到端或内置 NMS 输出。需要重新导出时，以下示例适用于 Ultralytics 8.4.211：
 
 ```python
 from ultralytics import YOLO
 
-model = YOLO("./weights/yolo11s-seg.pt")
-path = model.export(format="onnx", simplify=True, device=0, opset=12, dynamic=False, imgsz=640)
+model = YOLO("./weights/yolo26m-seg.pt")
+model.export(
+    format="onnx", imgsz=640, batch=1, dynamic=False,
+    opset=16, simplify=False, nms=None,
+)
 ```
 
-- 运行 `python export_onnx.py` 后，会在 `weights` 目录下生成 `yolo11s-seg.onnx`
+将导出文件放入 `onnx_model`。不同 Ultralytics 版本的导出选项可能不同，应核实实际输出符合上述布局。
 
-## 转 TensorRT
+## 编译和运行
 
-1. 切换到当前项目目录下；
-2. 如果是自己数据集上训练得到的模型，记得更改 `include/config.h` 中的相关配置；
-3. 确认 `CMakeLists.txt` 文件中 `cuda` 和 `tensorrt` 库的路径，与自己环境要对应，一般情况下是不需修改的；
-4. 新建 `onnx_model`目录，并将已导出的 `onnx` 模型拷贝到 `onnx_model` 目录下
-5. 依次执行：
+依赖 CUDA、TensorRT 8.x 和 OpenCV。从当前项目目录执行：
 
 ```bash
-mkdir build
+mkdir -p build
 cd build
-cmake ..
-make
-./main ../images  # 不存在trt模型时，会先构建trt模型然后推理；存在trt模型时，直接加载trt模型然后推理
+cmake .. -DTENSORRT_ROOT=/home/leslie/TensorRT-8.6.1.6
+cmake --build . -j
+./main ../images
 ```
 
-之后转换后的模型，以及首次 TensorRT 的推理结果都会保存到当前目录下
+`TENSORRT_ROOT` 替换为实际安装目录；系统已安装 TensorRT 时可省略。需要选择其他 CUDA 时，可额外传入 `-DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.7`。
+
+首次运行构建 `yolo26m-seg.plan`，之后直接加载该文件。引擎和推理结果图像保存在运行目录。
+
+更换模型或切换回 YOLO11 时，在 `include/config.h` 中同时修改 `onnxFile` 和 `trtFile`，并检查类别数、类别名称、输入尺寸和掩膜通道数。修改模型、构建精度或 TensorRT/CUDA 环境后，应移走旧 `.plan` 重新构建；启用 INT8 时也应使用对应模型和预处理的校准缓存。
