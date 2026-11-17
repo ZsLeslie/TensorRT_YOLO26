@@ -44,6 +44,6 @@ cmake --build . -j
 
 `TENSORRT_ROOT` 替换为实际安装目录；系统已安装 TensorRT 时可省略。需要选择其他 CUDA 时，可额外传入 `-DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.7`。
 
-首次运行构建 `yolo26m-seg.plan`，之后直接加载该文件。引擎和推理结果图像保存在运行目录。
+首次运行构建 `yolo26m-seg.engine`，之后直接加载该文件。引擎和推理结果图像保存在运行目录。
 
-更换模型或切换回 YOLO11 时，在 `include/config.h` 中同时修改 `onnxFile` 和 `trtFile`，并检查类别数、类别名称、输入尺寸和掩膜通道数。修改模型、构建精度或 TensorRT/CUDA 环境后，应移走旧 `.plan` 重新构建；启用 INT8 时也应使用对应模型和预处理的校准缓存。
+更换模型或切换回 YOLO11 时，在 `include/config.h` 中同时修改 `onnxFile` 和 `trtFile`，并检查类别数、类别名称、输入尺寸和掩膜通道数。修改模型、构建精度或 TensorRT/CUDA 环境后，应移走旧 `.engine` 重新构建；启用 INT8 时也应使用对应模型和预处理的校准缓存。

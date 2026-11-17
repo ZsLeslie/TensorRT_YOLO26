@@ -11,7 +11,7 @@ int run(char* imageDir){
         return -1;
     }
 
-    // create detector, and load engine plan
+    // create detector, and load the serialized engine
     YoloDetector detector(trtFile);
 
     // inference

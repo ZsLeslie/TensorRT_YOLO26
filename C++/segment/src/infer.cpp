@@ -139,7 +139,7 @@ void YoloDetector::get_engine(){
         }
         engine = runtime->deserializeCudaEngine(engineString.data(), engineString.size());
         if (!engine) {
-            throw std::runtime_error("Failed loading engine: " + trtFile_ + ". Remove the stale plan and rebuild it.");
+            throw std::runtime_error("Failed loading engine: " + trtFile_ + ". Remove the stale engine file and rebuild it.");
         }
         std::cout << "Loaded engine: " << trtFile_ << std::endl;
     } else {

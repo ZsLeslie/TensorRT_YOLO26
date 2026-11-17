@@ -44,6 +44,6 @@ cmake --build . -j
 
 Replace `TENSORRT_ROOT` with your installation directory, or omit it for a system installation. To select another CUDA toolkit, also pass `-DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-11.7`.
 
-The first run builds `yolo26m-seg.plan`; subsequent runs load it directly. Engines and annotated images are saved in the working directory.
+The first run builds `yolo26m-seg.engine`; subsequent runs load it directly. Engines and annotated images are saved in the working directory.
 
-When changing models or switching back to YOLO11, update both `onnxFile` and `trtFile` in `include/config.h`, and check class count, class names, input size and mask channels. Move aside the cached plan and rebuild after changing the model, build precision or TensorRT/CUDA environment. INT8 calibration caches must also match the model and preprocessing.
+When changing models or switching back to YOLO11, update both `onnxFile` and `trtFile` in `include/config.h`, and check class count, class names, input size and mask channels. Move aside the cached engine file and rebuild after changing the model, build precision or TensorRT/CUDA environment. INT8 calibration caches must also match the model and preprocessing.

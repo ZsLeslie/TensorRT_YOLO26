@@ -18,7 +18,7 @@ const int kNumBoxElement = 7 + kNumMasks;  // left, top, right, bottom, confiden
 
 // Raw one-to-many segmentation export: output0 [1, 4 + classes + masks, N].
 const std::string onnxFile = "../onnx_model/yolo26m-seg.onnx";
-const std::string trtFile = "./yolo26m-seg.plan";
+const std::string trtFile = "./yolo26m-seg.engine";
 
 // for FP16 mode
 const bool bFP16Mode = false;
